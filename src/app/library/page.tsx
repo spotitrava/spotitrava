@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { usePlayer, Track } from '@/context/PlayerContext';
 import { useAuth } from '@/context/AuthContext';
-import { Play, Clock, MoreHorizontal } from 'lucide-react';
+import { Play, Clock, MoreHorizontal, Heart as HeartIcon, Share2 as ShareIcon } from 'lucide-react';
 
 export default function LibraryPage() {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -53,47 +53,69 @@ export default function LibraryPage() {
   // Visualização Detalhada do Artista (Tracks)
   if (selectedArtist) {
     const artistTracks = tracks.filter(t => t.artist === selectedArtist);
+    const artistCover = artistTracks.find(t => t.cover_url)?.cover_url;
+
     return (
-      <div className="space-y-6 animate-in fade-in duration-500">
-        <button onClick={() => setSelectedArtist(null)} className="text-sm font-bold text-white/50 hover:text-white mb-4 flex items-center gap-2">
-          ← Voltar para Artistas
+      <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500 pb-24 md:pb-0">
+        <button onClick={() => setSelectedArtist(null)} className="text-sm font-bold text-white/50 hover:text-white mb-2 md:mb-4 flex items-center gap-2">
+          ← Voltar
         </button>
         
-        <div className="flex items-end gap-6 mb-8">
-          <div className="w-40 h-40 bg-spotify-green shadow-xl flex items-center justify-center text-7xl rounded-full">
-            🎤
+        {/* Header - Mobile Spotify Style */}
+        <div className="flex flex-col md:flex-row items-center md:items-end gap-6 mb-2 md:mb-8 text-center md:text-left">
+          <div className="w-64 h-64 md:w-40 md:h-40 bg-[#282828] shadow-2xl flex items-center justify-center text-7xl rounded-md overflow-hidden flex-shrink-0">
+            {artistCover ? (
+               <img src={artistCover} alt={selectedArtist} className="w-full h-full object-cover" />
+            ) : (
+               "🎤"
+            )}
           </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Artista</span>
-            <h1 className="text-6xl font-black">{selectedArtist}</h1>
-            <span className="text-white/70">{artistTracks.length} músicas mapeadas</span>
+          <div className="flex flex-col gap-1 md:gap-2 w-full">
+            <h1 className="text-3xl md:text-6xl font-black truncate px-4 md:px-0 text-left">{selectedArtist}</h1>
+            <div className="flex items-center gap-2 text-white/70 text-sm px-4 md:px-0 justify-start">
+               {user?.user_metadata?.avatar_url && (
+                 <img src={user.user_metadata.avatar_url} className="w-5 h-5 rounded-full" />
+               )}
+               <span className="font-bold text-white">{user?.user_metadata?.full_name?.split(' ')[0] || 'Usuário'}</span>
+            </div>
+            <span className="text-white/50 text-xs px-4 md:px-0 text-left">{artistTracks.length} salvamentos</span>
           </div>
         </div>
         
-        <div className="flex items-center gap-8 mb-8">
+        {/* Action Row */}
+        <div className="flex items-center justify-between px-4 md:px-0 mb-6">
+          <div className="flex items-center gap-6">
+            <button className="text-spotify-green hover:scale-105 transition-transform"><HeartIcon className="w-7 h-7 fill-current" /></button>
+            <button className="text-white/50 hover:text-white"><ShareIcon className="w-6 h-6" /></button>
+            <button className="text-white/50 hover:text-white"><MoreHorizontal className="w-6 h-6" /></button>
+          </div>
           <button 
             onClick={() => artistTracks[0] && playTrack(artistTracks[0])}
-            className="w-14 h-14 bg-spotify-green rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+            className="w-14 h-14 bg-spotify-green rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-xl"
           >
-            <Play className="w-8 h-8 text-black fill-current ml-1" />
+            <Play className="w-7 h-7 text-black fill-current ml-1" />
           </button>
         </div>
 
         <div className="w-full">
-          <div className="grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 border-b border-white/10 text-white/40 text-xs font-bold uppercase tracking-widest mb-4">
+          {/* Desktop Table Header */}
+          <div className="hidden md:grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 border-b border-white/10 text-white/40 text-xs font-bold uppercase tracking-widest mb-4">
             <span>#</span>
             <span>Título</span>
             <span>Álbum</span>
             <div className="flex justify-end"><Clock className="w-4 h-4" /></div>
           </div>
-          <div className="flex flex-col">
+
+          {/* Track List */}
+          <div className="flex flex-col gap-2 md:gap-0">
             {artistTracks.map((track, i) => (
               <div 
                 key={track.id}
                 onClick={() => playTrack(track)}
-                className={`grid grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-4 px-4 py-2 rounded-md hover:bg-white/10 group cursor-pointer transition-colors items-center ${currentTrack?.id === track.id ? 'bg-white/5' : ''}`}
+                className={`flex md:grid md:grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-3 md:gap-4 px-4 py-2 rounded-md hover:bg-white/10 group cursor-pointer transition-colors items-center ${currentTrack?.id === track.id ? 'bg-white/5' : ''}`}
               >
-                <div className="flex items-center justify-center relative">
+                {/* Desktop Number */}
+                <div className="hidden md:flex items-center justify-center relative">
                   {currentTrack?.id === track.id && isPlaying ? (
                     <div className="w-3 h-3 bg-spotify-green rounded-full animate-bounce" />
                   ) : (
@@ -104,24 +126,33 @@ export default function LibraryPage() {
                   <Play className={`w-3 h-3 text-white fill-current hidden group-hover:block ${currentTrack?.id === track.id ? 'text-spotify-green' : ''}`} />
                 </div>
                 
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="w-10 h-10 bg-white/5 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
+                {/* Title and Cover */}
+                <div className="flex items-center gap-3 overflow-hidden flex-1 md:flex-none">
+                  <div className="w-12 h-12 md:w-10 md:h-10 bg-[#282828] flex-shrink-0 flex items-center justify-center overflow-hidden">
                     {track.cover_url ? <img src={track.cover_url} alt="" className="w-full h-full object-cover" /> : "💿"}
                   </div>
                   <div className="flex flex-col truncate">
-                    <span className={`font-medium truncate ${currentTrack?.id === track.id ? 'text-spotify-green' : 'text-white'}`}>
+                    <span className={`font-semibold md:font-medium truncate text-base md:text-sm ${currentTrack?.id === track.id ? 'text-spotify-green' : 'text-white'}`}>
                       {track.title}
                     </span>
+                    <div className="flex items-center gap-1">
+                      {currentTrack?.id === track.id && isPlaying && <div className="md:hidden w-1.5 h-1.5 bg-spotify-green rounded-full" />}
+                      <span className="text-sm md:text-xs text-white/50 truncate">
+                         {track.artist}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-sm text-white/40 group-hover:text-white/70 truncate">
+                {/* Desktop Album */}
+                <div className="hidden md:block text-sm text-white/40 group-hover:text-white/70 truncate">
                   {track.album}
                 </div>
 
+                {/* Right Actions */}
                 <div className="flex items-center justify-end gap-4 text-white/40">
-                  <span className="text-xs group-hover:text-white/70">3:45</span>
-                  <MoreHorizontal className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="hidden md:inline text-xs group-hover:text-white/70">3:45</span>
+                  <MoreHorizontal className="w-5 h-5 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
             ))}
