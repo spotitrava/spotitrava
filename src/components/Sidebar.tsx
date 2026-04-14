@@ -7,10 +7,9 @@ const Sidebar = ({ onLinkClick }: { onLinkClick?: () => void }) => {
   return (
     <aside className="flex flex-col w-full h-full bg-black border-r border-white/5">
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-spotify-green flex items-center gap-2">
-
-          <span className="text-3xl">☄️</span> Spotitrava
-        </h1>
+        <div className="flex items-center">
+          <img src="/logo.png" alt="SpotiTrava" className="h-12 w-auto object-contain" />
+        </div>
       </div>
 
       <nav className="flex-1 px-3 space-y-1">

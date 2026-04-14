@@ -17,9 +17,8 @@ const Header = ({ onToggleSidebar }: { onToggleSidebar: () => void }) => {
       {/* Left side: Navigation or Logo */}
       <div className="flex items-center gap-4">
         {/* Mobile Logo */}
-        <div className="md:hidden flex items-center gap-2">
-           <svg viewBox="0 0 24 24" className="w-8 h-8 fill-spotify-green"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm5.508 17.304c-.216.36-.672.468-1.032.252-2.844-1.74-6.432-2.136-10.656-1.164-.408.096-.828-.156-.924-.564-.096-.408.156-.828.564-.924 4.62-1.056 8.592-.588 11.784 1.368.36.216.48.672.264 1.032zm1.476-3.264c-.276.444-.852.588-1.296.312-3.252-2-8.196-2.58-12.036-1.416-.504.156-1.032-.132-1.188-.636s.132-1.032.636-1.188c4.392-1.332 9.852-.672 13.572 1.62.444.276.588.852.312 1.296zm.132-3.444C13.296 8.28 6.552 8.064 2.664 9.24a1.016 1.016 0 01-1.236-.72c-.18-.54.12-1.128.66-1.308 4.476-1.356 11.916-1.104 16.548 1.656.492.288.66.924.36 1.416-.288.492-.924.66-1.416.36z"/></svg>
-           <span className="text-white font-bold text-lg tracking-tight">Spotify</span>
+        <div className="md:hidden flex items-center">
+           <img src="/logo.png" alt="SpotiTrava" className="h-10 w-auto object-contain" />
         </div>
 
         {/* Desktop Navigation */}
