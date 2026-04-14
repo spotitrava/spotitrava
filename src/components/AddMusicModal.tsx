@@ -12,7 +12,7 @@ interface AddMusicModalProps {
 
 const AddMusicModal = ({ isOpen, onClose }: AddMusicModalProps) => {
   const { session } = useAuth();
-  const [activeTab, setActiveTab] = useState<'drive' | 'youtube'>('drive');
+  const [activeTab, setActiveTab] = useState<'drive' | 'youtube'>('youtube');
   const [url, setUrl] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,21 +88,21 @@ const AddMusicModal = ({ isOpen, onClose }: AddMusicModalProps) => {
         <div className="flex border-b border-white/5">
           <button
             type="button"
-            onClick={() => { setActiveTab('drive'); setError(null); setSuccess(null); setUrl(''); }}
-            className={`flex-1 py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
-              activeTab === 'drive' ? 'text-spotify-green border-b-2 border-spotify-green' : 'text-white/40 hover:text-white'
-            }`}
-          >
-            <HardDrive className="w-4 h-4" /> Drive
-          </button>
-          <button
-            type="button"
             onClick={() => { setActiveTab('youtube'); setError(null); setSuccess(null); setUrl(''); }}
             className={`flex-1 py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
               activeTab === 'youtube' ? 'text-red-500 border-b-2 border-red-500' : 'text-white/40 hover:text-white'
             }`}
           >
             <PlaySquare className="w-4 h-4" /> YouTube
+          </button>
+          <button
+            type="button"
+            onClick={() => { setActiveTab('drive'); setError(null); setSuccess(null); setUrl(''); }}
+            className={`flex-1 py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
+              activeTab === 'drive' ? 'text-spotify-green border-b-2 border-spotify-green' : 'text-white/40 hover:text-white'
+            }`}
+          >
+            <HardDrive className="w-4 h-4" /> Drive
           </button>
         </div>
 
