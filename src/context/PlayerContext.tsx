@@ -22,12 +22,17 @@ interface PlayerContextType {
   duration: number;
   isBuffering: boolean;
   volume: number;
-  playTrack: (track: Track) => void;
+  isShuffle: boolean;
+  repeatMode: 'off' | 'track' | 'queue';
+  playTrack: (track: Track, tracks?: Track[]) => void;
   togglePlay: () => void;
   nextTrack: () => void;
   prevTrack: () => void;
+  toggleShuffle: () => void;
+  toggleRepeat: () => void;
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
+  setQueue: (tracks: Track[]) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -42,7 +47,8 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const { session } = useAuth();
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [queue, setQueue] = useState<Track[]>([]);
+  const [queue, setQueueState] = useState<Track[]>([]);
+  const [originalQueue, setOriginalQueue] = useState<Track[]>([]); // For un-shuffling
   
   // Audio state
   const [progress, setProgress] = useState(0);
@@ -50,6 +56,8 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const [duration, setDuration] = useState(0);
   const [isBuffering, setIsBuffering] = useState(false);
   const [volume, setVolumeState] = useState(0.8);
+  const [isShuffle, setIsShuffle] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<'off' | 'track' | 'queue'>('off');
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
@@ -88,6 +96,56 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
+  const nextTrack = useCallback(() => {
+    if (queue.length === 0 || !currentTrack) return;
+
+    if (repeatMode === 'track') {
+       seek(0);
+       setIsPlaying(true);
+       return;
+    }
+
+    const currentIndex = queue.findIndex(t => t.id === currentTrack.id);
+    let nextIndex = currentIndex + 1;
+
+    if (nextIndex >= queue.length) {
+      if (repeatMode === 'queue') {
+        nextIndex = 0;
+      } else {
+        setIsPlaying(false);
+        return;
+      }
+    }
+
+    setCurrentTrack(queue[nextIndex]);
+    setIsPlaying(true);
+  }, [queue, currentTrack, repeatMode]);
+
+  const prevTrack = useCallback(() => {
+    if (queue.length === 0 || !currentTrack) return;
+
+    // If more than 3 seconds in, restart the track
+    if (currentTime > 3) {
+      seek(0);
+      return;
+    }
+
+    const currentIndex = queue.findIndex(t => t.id === currentTrack.id);
+    let prevIndex = currentIndex - 1;
+
+    if (prevIndex < 0) {
+      if (repeatMode === 'queue') {
+        prevIndex = queue.length - 1;
+      } else {
+        seek(0);
+        return;
+      }
+    }
+
+    setCurrentTrack(queue[prevIndex]);
+    setIsPlaying(true);
+  }, [queue, currentTrack, currentTime, repeatMode]);
+
   // Setup native audio element
   useEffect(() => {
     if (!audioRef.current) {
@@ -97,8 +155,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       const audio = audioRef.current;
 
       audio.onended = () => {
-        setIsPlaying(false);
-        // nextTrack will be called via effect
+        nextTrack();
       };
 
       audio.ontimeupdate = () => {
@@ -120,7 +177,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         setIsBuffering(false);
       };
     }
-  }, []);
+  }, [nextTrack]);
 
   // Clean up YouTube progress interval
   const clearYtInterval = useCallback(() => {
@@ -214,8 +271,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
               setIsBuffering(true);
               break;
             case YT.PlayerState.ENDED:
-              setIsPlaying(false);
-              clearYtInterval();
+              nextTrack();
               break;
           }
         },
@@ -223,6 +279,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
           console.error("YouTube Player error:", event.data);
           setIsBuffering(false);
           setIsPlaying(false);
+          nextTrack(); // Try next track on error
         },
       },
     });
@@ -230,7 +287,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       clearYtInterval();
     };
-  }, [currentTrack, ytApiReady, isYouTube]);
+  }, [currentTrack, ytApiReady, isYouTube, nextTrack]);
 
   // Handle native audio track changes
   useEffect(() => {
@@ -300,22 +357,50 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const playTrack = (track: Track) => {
+  const playTrack = (track: Track, newQueue?: Track[]) => {
+    if (newQueue) {
+      setOriginalQueue(newQueue);
+      if (isShuffle) {
+        const shuffled = [...newQueue].sort(() => Math.random() - 0.5);
+        setQueueState(shuffled);
+      } else {
+        setQueueState(newQueue);
+      }
+    }
     setCurrentTrack(track);
     setIsPlaying(true);
   };
 
-  const nextTrack = () => {
-    const currentIndex = queue.findIndex(t => t.id === currentTrack?.id);
-    if (currentIndex >= 0 && currentIndex < queue.length - 1) {
-      playTrack(queue[currentIndex + 1]);
-    }
+  const toggleShuffle = () => {
+    setIsShuffle(prev => {
+      const newState = !prev;
+      if (newState) {
+        // Shuffle current queue
+        const shuffled = [...queue].sort(() => Math.random() - 0.5);
+        setQueueState(shuffled);
+      } else {
+        // Restore original queue
+        setQueueState(originalQueue);
+      }
+      return newState;
+    });
   };
 
-  const prevTrack = () => {
-    const currentIndex = queue.findIndex(t => t.id === currentTrack?.id);
-    if (currentIndex > 0) {
-      playTrack(queue[currentIndex - 1]);
+  const toggleRepeat = () => {
+    setRepeatMode(prev => {
+      if (prev === 'off') return 'queue';
+      if (prev === 'queue') return 'track';
+      return 'off';
+    });
+  };
+
+  const setQueue = (tracks: Track[]) => {
+    setOriginalQueue(tracks);
+    if (isShuffle) {
+      const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+      setQueueState(shuffled);
+    } else {
+      setQueueState(tracks);
     }
   };
 
@@ -346,12 +431,17 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       duration, 
       isBuffering,
       volume,
+      isShuffle,
+      repeatMode,
       playTrack, 
       togglePlay, 
       nextTrack, 
       prevTrack,
+      toggleShuffle,
+      toggleRepeat,
       seek,
-      setVolume
+      setVolume,
+      setQueue
     }}>
       {children}
       {/* Hidden container for YouTube IFrame player */}

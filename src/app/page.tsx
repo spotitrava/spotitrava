@@ -1,81 +1,111 @@
 "use client";
 
-import React from 'react';
-import { Play } from 'lucide-react';
-
-const categories = [
-  { title: "Músicas Curtidas", color: "from-indigo-900", icon: "❤️" },
-  { title: "Sincronizado", color: "from-green-900", icon: "☁️" },
-  { title: "Recentes", color: "from-gray-800", icon: "🕒" },
-];
+import React, { useEffect, useState } from 'react';
+import { Play, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { usePlayer, Track } from '@/context/PlayerContext';
 
 export default function Home() {
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { playTrack } = usePlayer();
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('tracks')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTracks(data || []);
+    } catch (err) {
+      console.error('Error fetching tracks:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const trendingTracks = tracks.slice(0, 6);
+  
+  // Get unique artists with their first available cover
+  const popularArtists = Array.from(new Set(tracks.map(t => t.artist)))
+    .slice(0, 6)
+    .map(artistName => {
+      const artistTrack = tracks.find(t => t.artist === artistName && t.cover_url);
+      return {
+        name: artistName,
+        cover_url: artistTrack?.cover_url || null
+      };
+    });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-10 h-10 text-spotify-green animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-10 pb-12">
+      {/* Músicas em alta */}
       <section>
-        <h2 className="text-3xl font-bold mb-6">Boa tarde</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((cat, i) => (
+        <h2 className="text-2xl font-bold mb-6 tracking-tight">Músicas em alta</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+          {trendingTracks.map((track) => (
             <div 
-              key={i} 
-              className="group flex items-center gap-4 bg-white/5 hover:bg-white/10 transition-all rounded-md overflow-hidden cursor-pointer relative"
+              key={track.id} 
+              onClick={() => playTrack(track, tracks)}
+              className="group cursor-pointer transition-all duration-300"
             >
-              <div className={`w-20 h-20 bg-gradient-to-br ${cat.color} flex items-center justify-center text-3xl shadow-lg`}>
-                {cat.icon}
+              <div className="aspect-square bg-[#282828] rounded-md mb-3 shadow-lg relative overflow-hidden group-hover:shadow-2xl transition-shadow">
+                {track.cover_url ? (
+                  <img src={track.cover_url} alt={track.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-4xl">💿</div>
+                )}
+                <div className="absolute bottom-2 right-2 w-10 h-10 bg-spotify-green rounded-full shadow-2xl flex items-center justify-center translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
+                  <Play className="w-5 h-5 text-black fill-current ml-0.5" />
+                </div>
               </div>
-              <p className="font-bold">{cat.title}</p>
-              <div className="absolute right-4 w-12 h-12 bg-spotify-green rounded-full shadow-2xl flex items-center justify-center translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-                <Play className="w-6 h-6 text-black fill-current ml-1" />
-              </div>
+              <h3 className="font-bold text-[15px] leading-tight text-white truncate mb-1 group-hover:underline">{track.title}</h3>
+              <p className="text-sm text-white/50 truncate">{track.artist}</p>
             </div>
           ))}
         </div>
       </section>
 
+      {/* Artistas populares */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold hover:underline cursor-pointer">Sua Biblioteca do Drive</h2>
-          <span className="text-xs font-bold text-white/40 uppercase tracking-widest hover:underline cursor-pointer">Mostrar tudo</span>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {[1, 2, 3, 4, 5].map((i) => (
+        <h2 className="text-2xl font-bold mb-6 tracking-tight">Artistas populares</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+          {popularArtists.map((artist, i) => (
             <div 
               key={i} 
-              className="glass p-4 rounded-xl hover:bg-white/10 transition-all cursor-pointer group"
+              className="group cursor-pointer transition-all duration-300"
+              onClick={() => {
+                // Navigate to library or filter by artist in the future
+                window.location.href = `/library?artist=${encodeURIComponent(artist.name)}`;
+              }}
             >
-              <div className="aspect-square bg-white/5 rounded-lg mb-4 shadow-2xl flex items-center justify-center text-4xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                💿
-                <div className="absolute bottom-2 right-2 w-12 h-12 bg-spotify-green rounded-full shadow-2xl flex items-center justify-center translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
-                  <Play className="w-6 h-6 text-black fill-current ml-1" />
+              <div className="aspect-square bg-[#282828] rounded-full mb-3 shadow-lg relative overflow-hidden group-hover:shadow-2xl transition-shadow">
+                {artist.cover_url ? (
+                  <img src={artist.cover_url} alt={artist.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-4xl">🎤</div>
+                )}
+                <div className="absolute bottom-2 right-2 w-10 h-10 bg-spotify-green rounded-full shadow-2xl flex items-center justify-center translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
+                  <Play className="w-5 h-5 text-black fill-current ml-0.5" />
                 </div>
               </div>
-              <h3 className="font-bold truncate mb-1">Playlist do Google Drive</h3>
-              <p className="text-sm text-white/40 line-clamp-2">Suas músicas sincronizadas da pasta SPOTITRAVA_MUSICAS.</p>
-            </div>
-          ))}
-        </div>
-      </section>
-      
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold hover:underline cursor-pointer">Feito para você</h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div 
-              key={i} 
-              className="glass p-4 rounded-xl hover:bg-white/10 transition-all cursor-pointer group animate-in fade-in slide-in-from-bottom-2 duration-500 delay-150"
-            >
-              <div className="aspect-square bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-lg mb-4 shadow-2xl flex items-center justify-center text-4xl relative overflow-hidden border border-white/5">
-                🎵
-                <div className="absolute bottom-2 right-2 w-12 h-12 bg-spotify-green rounded-full shadow-2xl flex items-center justify-center translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-                  <Play className="w-6 h-6 text-black fill-current ml-1" />
-                </div>
-              </div>
-              <h3 className="font-bold truncate mb-1">Descobertas da Semana</h3>
-              <p className="text-sm text-white/40 truncate">Novas músicas baseadas no seu gosto.</p>
+              <h3 className="font-bold text-[15px] text-white truncate text-center group-hover:underline">{artist.name}</h3>
+              <p className="text-sm text-white/50 text-center">Artista</p>
             </div>
           ))}
         </div>
@@ -83,3 +113,4 @@ export default function Home() {
     </div>
   );
 }
+

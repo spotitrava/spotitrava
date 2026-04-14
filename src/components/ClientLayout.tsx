@@ -6,27 +6,38 @@ import Sidebar from "@/components/Sidebar";
 import BottomPlayer from "@/components/BottomPlayer";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { PlayerProvider } from "@/context/PlayerContext";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { LogOut, ShieldCheck, Menu, X as CloseIcon } from "lucide-react";
 import AddMusicModal from './AddMusicModal';
 
-const Header = () => {
+const Header = ({ onToggleSidebar }: { onToggleSidebar: () => void }) => {
   const { user, session, signOut, signInWithGoogle } = useAuth();
+  
   return (
-    <header className="h-16 flex items-center justify-between px-8 sticky top-0 z-40 bg-black/20 backdrop-blur-md">
-      <div className="flex gap-4">
-        <button className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-colors">
-          <span className="text-white">{"<"}</span>
-        </button>
-        <button className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-colors opacity-50 cursor-not-allowed">
-          <span className="text-white">{">"}</span>
-        </button>
+    <header className="h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-40 bg-black/95 md:bg-black/20 backdrop-blur-md">
+      {/* Left side: Navigation or Logo */}
+      <div className="flex items-center gap-4">
+        {/* Mobile Logo */}
+        <div className="md:hidden flex items-center gap-2">
+           <svg viewBox="0 0 24 24" className="w-8 h-8 fill-spotify-green"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm5.508 17.304c-.216.36-.672.468-1.032.252-2.844-1.74-6.432-2.136-10.656-1.164-.408.096-.828-.156-.924-.564-.096-.408.156-.828.564-.924 4.62-1.056 8.592-.588 11.784 1.368.36.216.48.672.264 1.032zm1.476-3.264c-.276.444-.852.588-1.296.312-3.252-2-8.196-2.58-12.036-1.416-.504.156-1.032-.132-1.188-.636s.132-1.032.636-1.188c4.392-1.332 9.852-.672 13.572 1.62.444.276.588.852.312 1.296zm.132-3.444C13.296 8.28 6.552 8.064 2.664 9.24a1.016 1.016 0 01-1.236-.72c-.18-.54.12-1.128.66-1.308 4.476-1.356 11.916-1.104 16.548 1.656.492.288.66.924.36 1.416-.288.492-.924.66-1.416.36z"/></svg>
+           <span className="text-white font-bold text-lg tracking-tight">Spotify</span>
+        </div>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex gap-4">
+          <button className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-colors">
+            <span className="text-white">{"<"}</span>
+          </button>
+          <button className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-colors opacity-50 cursor-not-allowed">
+            <span className="text-white">{">"}</span>
+          </button>
+        </div>
       </div>
       
       <div className="flex items-center gap-4">
         {user?.email === 'spotitrava@gmail.com' && (
           <Link 
             href="/admin" 
-            className="flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-lg"
+            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-lg"
           >
             <ShieldCheck className="w-4 h-4" />
             Painel Admin
@@ -35,13 +46,15 @@ const Header = () => {
 
         {user ? (
           <div className="flex items-center gap-2 md:gap-3">
+            {/* Mobile Actions */}
             <button 
-              onClick={() => window.dispatchEvent(new CustomEvent('open-add-music'))}
-              className="p-2 text-spotify-green bg-spotify-green/10 rounded-full hover:bg-spotify-green/20 transition-colors md:hidden"
-              title="Adicionar Música"
+              onClick={onToggleSidebar}
+              className="md:hidden p-2 text-white hover:bg-white/10 rounded-full transition-colors"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              <Menu className="w-7 h-7" />
             </button>
+
+            {/* User Profile - Desktop and Mobile (partial flex) */}
             <button className="flex items-center gap-2 p-1 pr-3 md:pr-4 rounded-full bg-black/80 hover:bg-black/60 transition-all group">
               {user.user_metadata.avatar_url ? (
                 <img src={user.user_metadata.avatar_url} alt="User" className="w-7 h-7 rounded-full" />
@@ -50,11 +63,11 @@ const Header = () => {
                   {user.email?.[0].toUpperCase()}
                 </div>
               )}
-              <span className="text-sm font-bold truncate max-w-[100px]">{user.user_metadata.full_name || user.email}</span>
+              <span className="hidden md:inline text-sm font-bold truncate max-w-[100px]">{user.user_metadata.full_name || user.email}</span>
             </button>
             <button 
               onClick={signOut}
-              className="p-2 text-white/40 hover:text-white transition-colors"
+              className="hidden md:block p-2 text-white/40 hover:text-white transition-colors"
               title="Sair"
             >
               <LogOut className="w-5 h-5" />
@@ -75,12 +88,15 @@ const Header = () => {
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const [isAddMusicOpen, setIsAddMusicOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleOpenModal = () => setIsAddMusicOpen(true);
     window.addEventListener('open-add-music', handleOpenModal);
     return () => window.removeEventListener('open-add-music', handleOpenModal);
   }, []);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
     <AuthProvider>
@@ -89,16 +105,37 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           isOpen={isAddMusicOpen} 
           onClose={() => setIsAddMusicOpen(false)} 
         />
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar />
+        <div className="flex h-screen overflow-hidden bg-black">
+          {/* Mobile Overlay */}
+          {isSidebarOpen && (
+            <div 
+              className="fixed inset-0 bg-black/60 z-[60] md:hidden backdrop-blur-sm animate-in fade-in duration-300"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
+
+          {/* Sidebar Wrapper */}
+          <div className={`
+            fixed inset-y-0 left-0 z-[70] w-72 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:z-auto
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          `}>
+            {/* Close button for mobile sidebar */}
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="absolute top-4 right-4 p-2 text-white/50 hover:text-white md:hidden"
+            >
+              <CloseIcon className="w-6 h-6" />
+            </button>
+            <Sidebar />
+          </div>
 
           <main className="flex-1 relative overflow-y-auto gradient-bg pb-32">
-            <Header />
+            <Header onToggleSidebar={toggleSidebar} />
             <div className="p-4 md:p-8">
               {children}
             </div>
             {/* Extra padding for mobile bottom nav + player */}
-            <div className="h-16 md:hidden" />
+            <div className="h-20 md:hidden" />
           </main>
         </div>
 

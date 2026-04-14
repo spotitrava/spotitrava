@@ -2,10 +2,10 @@ import Link from 'next/link';
 import { Home, Search, Library, PlusSquare, Heart, LogIn } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
-const Sidebar = () => {
+const Sidebar = ({ onLinkClick }: { onLinkClick?: () => void }) => {
   const { user, signInWithGoogle, isLoading } = useAuth();
   return (
-    <aside className="hidden md:flex w-64 bg-black flex-col h-full border-r border-white/5">
+    <aside className="flex flex-col w-full h-full bg-black border-r border-white/5">
       <div className="p-6">
         <h1 className="text-2xl font-bold text-spotify-green flex items-center gap-2">
 

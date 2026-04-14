@@ -90,7 +90,7 @@ export default function LibraryPage() {
             <button className="text-white/50 hover:text-white"><MoreHorizontal className="w-6 h-6" /></button>
           </div>
           <button 
-            onClick={() => artistTracks[0] && playTrack(artistTracks[0])}
+            onClick={() => artistTracks[0] && playTrack(artistTracks[0], artistTracks)}
             className="w-14 h-14 bg-spotify-green rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-xl"
           >
             <Play className="w-7 h-7 text-black fill-current ml-1" />
@@ -111,7 +111,7 @@ export default function LibraryPage() {
             {artistTracks.map((track, i) => (
               <div 
                 key={track.id}
-                onClick={() => playTrack(track)}
+                onClick={() => playTrack(track, artistTracks)}
                 className={`flex md:grid md:grid-cols-[16px_4fr_3fr_minmax(120px,1fr)] gap-3 md:gap-4 px-4 py-2 rounded-md hover:bg-white/10 group cursor-pointer transition-colors items-center ${currentTrack?.id === track.id ? 'bg-white/5' : ''}`}
               >
                 {/* Desktop Number */}

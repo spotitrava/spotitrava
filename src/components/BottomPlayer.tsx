@@ -36,7 +36,11 @@ const BottomPlayer = () => {
     seek,
     isBuffering,
     volume,
-    setVolume
+    setVolume,
+    isShuffle,
+    repeatMode,
+    toggleShuffle,
+    toggleRepeat
   } = usePlayer();
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -135,7 +139,10 @@ const BottomPlayer = () => {
 
         {/* Big Play Controls */}
         <div className="flex items-center justify-between px-2 mb-8">
-          <button className="text-white hover:text-spotify-green transition-colors">
+          <button 
+            onClick={toggleShuffle}
+            className={`${isShuffle ? 'text-spotify-green' : 'text-white'} hover:opacity-80 transition-all`}
+          >
             <Shuffle className="w-6 h-6" />
           </button>
           <button onClick={prevTrack} className="text-white hover:text-white/70 transition-colors">
@@ -153,8 +160,14 @@ const BottomPlayer = () => {
           <button onClick={nextTrack} className="text-white hover:text-white/70 transition-colors">
             <SkipForward className="w-10 h-10 fill-current" />
           </button>
-          <button className="text-white hover:text-spotify-green transition-colors">
+          <button 
+            onClick={toggleRepeat}
+            className={`${repeatMode !== 'off' ? 'text-spotify-green' : 'text-white'} hover:opacity-80 transition-all relative`}
+          >
             <Repeat className="w-6 h-6" />
+            {repeatMode === 'track' && (
+              <span className="absolute -top-1 -right-1 bg-spotify-green text-black text-[8px] font-bold w-3 h-3 rounded-full flex items-center justify-center">1</span>
+            )}
           </button>
         </div>
 
@@ -208,7 +221,10 @@ const BottomPlayer = () => {
         {/* Main Controls - Desktop Only */}
         <div className="hidden md:flex flex-col items-center gap-2 max-w-[40%] w-full">
           <div className="flex items-center gap-6">
-            <button className="text-white/40 hover:text-white transition-colors">
+            <button 
+              onClick={toggleShuffle}
+              className={`${isShuffle ? 'text-spotify-green' : 'text-white/40'} hover:text-white transition-colors`}
+            >
               <Shuffle className="w-4 h-4" />
             </button>
             <button 
@@ -236,8 +252,14 @@ const BottomPlayer = () => {
             >
               <SkipForward className="w-5 h-5 fill-current" />
             </button>
-            <button className="text-white/40 hover:text-white transition-colors">
+            <button 
+              onClick={toggleRepeat}
+              className={`${repeatMode !== 'off' ? 'text-spotify-green' : 'text-white/40'} hover:text-white transition-colors relative`}
+            >
               <Repeat className="w-4 h-4" />
+              {repeatMode === 'track' && (
+                <span className="absolute -top-1 -right-1 bg-spotify-green text-black text-[7px] font-bold w-2.5 h-2.5 rounded-full flex items-center justify-center">1</span>
+              )}
             </button>
           </div>
           
