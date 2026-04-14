@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --color-spotify-green: #1DB954;
+  --color-spotify-black: #121212;
+  --color-spotify-dark: #0a0a0a;
+  --color-spotify-light: #282828;
+  
+  --font-inter: "Inter", sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+  }
+
+  body {
+    @apply bg-[var(--color-spotify-dark)] text-white font-inter selection:bg-spotify-green/30;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+  
+  .glass-hover {
+    @apply hover:bg-white/10 transition-colors duration-300;
+  }
+
+  .text-shadow-glow {
+    text-shadow: 0 0 20px rgba(29, 185, 84, 0.5);
+  }
+
+  .gradient-bg {
+    background: radial-gradient(circle at top left, rgba(29, 185, 84, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at bottom right, rgba(29, 185, 84, 0.05) 0%, transparent 40%);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
