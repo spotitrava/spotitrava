@@ -5,9 +5,10 @@ import { useAuth } from '@/context/AuthContext';
 const Sidebar = () => {
   const { user, signInWithGoogle, isLoading } = useAuth();
   return (
-    <aside className="w-64 bg-black flex flex-col h-full border-r border-white/5">
+    <aside className="hidden md:flex w-64 bg-black flex-col h-full border-r border-white/5">
       <div className="p-6">
         <h1 className="text-2xl font-bold text-spotify-green flex items-center gap-2">
+
           <span className="text-3xl">☄️</span> Spotitrava
         </h1>
       </div>

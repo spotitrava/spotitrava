@@ -120,17 +120,34 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <div className="flex h-screen overflow-hidden">
           <Sidebar />
 
-          <main className="flex-1 relative overflow-y-auto gradient-bg">
+          <main className="flex-1 relative overflow-y-auto gradient-bg pb-32">
             <Header />
-            <div className="p-8">
+            <div className="p-4 md:p-8">
               {children}
             </div>
-            <div className="h-32" />
+            {/* Extra padding for mobile bottom nav + player */}
+            <div className="h-16 md:hidden" />
           </main>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 z-50">
+        <div className="fixed bottom-0 left-0 right-0 z-50 flex flex-col">
           <BottomPlayer />
+
+          {/* Mobile Bottom Navigation */}
+          <div className="md:hidden h-14 bg-black border-t border-white/10 flex items-center justify-around px-2">
+            <Link href="/" className="flex flex-col items-center justify-center p-2 text-white/50 hover:text-white transition-colors">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span className="text-[10px] mt-1 font-medium">Início</span>
+            </Link>
+            <Link href="/search" className="flex flex-col items-center justify-center p-2 text-white/50 hover:text-white transition-colors">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <span className="text-[10px] mt-1 font-medium">Buscar</span>
+            </Link>
+            <Link href="/library" className="flex flex-col items-center justify-center p-2 text-white/50 hover:text-white transition-colors">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></svg>
+              <span className="text-[10px] mt-1 font-medium">Biblioteca</span>
+            </Link>
+          </div>
         </div>
       </PlayerProvider>
     </AuthProvider>

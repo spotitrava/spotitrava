@@ -58,28 +58,40 @@ const BottomPlayer = () => {
   };
 
   return (
-    <div className="h-24 bg-black/90 backdrop-blur-xl border-t border-white/5 px-4 flex items-center justify-between z-50">
+    <div className="h-16 md:h-24 bg-black/95 backdrop-blur-xl border-t border-white/5 px-3 md:px-4 flex items-center justify-between z-50 relative">
+      
+      {/* Mobile Top Progress Bar */}
+      <div 
+        className="absolute top-0 left-0 w-full h-[2px] bg-white/10 md:hidden cursor-pointer"
+        onClick={handleSeek}
+      >
+        <div 
+           className="h-full bg-spotify-green relative" 
+           style={{ width: `${progress}%` }}
+        />
+      </div>
+
       {/* Current Track Info */}
-      <div className="flex items-center gap-4 w-[30%]">
-        <div className="w-14 h-14 bg-white/5 rounded-lg overflow-hidden group relative flex items-center justify-center text-2xl">
+      <div className="flex items-center gap-3 w-[70%] md:w-[30%]">
+        <div className="w-10 h-10 md:w-14 md:h-14 bg-white/5 rounded-md overflow-hidden group flex-shrink-0 relative flex items-center justify-center text-xl md:text-2xl">
           {currentTrack?.cover_url ? (
             <img src={currentTrack.cover_url} alt="Cover" className="w-full h-full object-cover" />
           ) : (
             "💿"
           )}
         </div>
-        <div className="flex flex-col justify-center overflow-hidden">
-          <h3 className="text-sm font-semibold hover:underline cursor-pointer truncate">
+        <div className="flex flex-col justify-center overflow-hidden min-w-0 pr-2">
+          <h3 className="text-sm font-semibold truncate hover:underline cursor-pointer">
             {currentTrack?.title || "Selecione uma música"}
           </h3>
-          <p className="text-xs text-white/50 hover:underline cursor-pointer truncate">
+          <p className="text-xs text-white/50 truncate hover:underline cursor-pointer">
             {currentTrack?.artist || "Google Drive Library"}
           </p>
         </div>
       </div>
 
-      {/* Main Controls */}
-      <div className="flex flex-col items-center gap-2 max-w-[40%] w-full">
+      {/* Main Controls - Desktop Only */}
+      <div className="hidden md:flex flex-col items-center gap-2 max-w-[40%] w-full">
         <div className="flex items-center gap-6">
           <button className="text-white/40 hover:text-white transition-colors">
             <Shuffle className="w-4 h-4" />
@@ -114,7 +126,7 @@ const BottomPlayer = () => {
           </button>
         </div>
         
-        {/* Progress Bar */}
+        {/* Progress Bar - Desktop */}
         <div className="flex items-center gap-2 w-full">
           <span className="text-[10px] text-white/40 min-w-[35px] text-right">
             {formatTime(currentTime)}
@@ -139,27 +151,48 @@ const BottomPlayer = () => {
         </div>
       </div>
 
-      {/* Right Controls (Volume etc) */}
+      {/* Right Controls */}
       <div className="flex items-center justify-end gap-3 w-[30%]">
-        <button className="text-white/40 hover:text-white/70 transition-colors">
-          <ListMusic className="w-4 h-4" />
-        </button>
-        <div className="flex items-center gap-2 w-32 group">
-          <Volume2 className="w-4 h-4 text-white/40 group-hover:text-white/70" />
-          <div 
-            ref={volumeRef}
-            onClick={handleVolumeChange}
-            className="flex-1 h-1 bg-white/10 rounded-full relative cursor-pointer"
+        
+        {/* Mobile controls */}
+        <div className="flex items-center justify-end gap-4 w-full md:hidden">
+          <button 
+            onClick={togglePlay}
+            disabled={!currentTrack}
+            className="w-8 h-8 flex items-center justify-center disabled:opacity-50"
           >
-            <div 
-              className="absolute left-0 top-0 h-full bg-white/50 rounded-full group-hover:bg-spotify-green" 
-              style={{ width: `${volume * 100}%` }}
-            />
-          </div>
+            {isBuffering ? (
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
+            ) : isPlaying ? (
+              <Pause className="w-6 h-6 text-white fill-current" />
+            ) : (
+              <Play className="w-6 h-6 text-white fill-current ml-1" />
+            )}
+          </button>
         </div>
-        <button className="text-white/40 hover:text-white/70 transition-colors">
-          <Maximize2 className="w-4 h-4" />
-        </button>
+
+        {/* Desktop controls */}
+        <div className="hidden md:flex items-center justify-end gap-3 w-full">
+            <button className="text-white/40 hover:text-white/70 transition-colors">
+            <ListMusic className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-2 w-32 group">
+            <Volume2 className="w-4 h-4 text-white/40 group-hover:text-white/70" />
+            <div 
+                ref={volumeRef}
+                onClick={handleVolumeChange}
+                className="flex-1 h-1 bg-white/10 rounded-full relative cursor-pointer"
+            >
+                <div 
+                className="absolute left-0 top-0 h-full bg-white/50 rounded-full group-hover:bg-spotify-green" 
+                style={{ width: `${volume * 100}%` }}
+                />
+            </div>
+            </div>
+            <button className="text-white/40 hover:text-white/70 transition-colors">
+            <Maximize2 className="w-4 h-4" />
+            </button>
+        </div>
       </div>
     </div>
   );
