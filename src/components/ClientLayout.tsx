@@ -6,35 +6,11 @@ import Sidebar from "@/components/Sidebar";
 import BottomPlayer from "@/components/BottomPlayer";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { PlayerProvider } from "@/context/PlayerContext";
-import { LogOut, RefreshCw, ShieldCheck } from "lucide-react";
-import { syncMusicAction } from "@/app/actions/music";
+import { LogOut, ShieldCheck } from "lucide-react";
 import AddMusicModal from './AddMusicModal';
 
 const Header = () => {
   const { user, session, signOut, signInWithGoogle } = useAuth();
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  const handleSync = async () => {
-    if (session?.provider_token && user) {
-      setIsSyncing(true);
-      try {
-        const result = await syncMusicAction(session.provider_token, user.id);
-        if (result.success) {
-          alert(`Sincronização concluída! ${result.count} músicas encontradas.`);
-        } else {
-          alert(`Erro: ${result.error}`);
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Erro ao sincronizar músicas.");
-      } finally {
-        setIsSyncing(false);
-      }
-    } else if (!user) {
-      alert("Por favor, faça login com Google primeiro.");
-    }
-  };
-
   return (
     <header className="h-16 flex items-center justify-between px-8 sticky top-0 z-40 bg-black/20 backdrop-blur-md">
       <div className="flex gap-4">
@@ -47,17 +23,6 @@ const Header = () => {
       </div>
       
       <div className="flex items-center gap-4">
-        {user && (
-          <button 
-            onClick={handleSync}
-            disabled={isSyncing}
-            className="flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm bg-white text-black hover:scale-105 transition-all disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Sincronizando...' : 'Sincronizar Drive'}
-          </button>
-        )}
-        
         {user?.email === 'spotitrava@gmail.com' && (
           <Link 
             href="/admin" 
@@ -69,8 +34,15 @@ const Header = () => {
         )}
 
         {user ? (
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 p-1 pr-4 rounded-full bg-black/80 hover:bg-black/60 transition-all group">
+          <div className="flex items-center gap-2 md:gap-3">
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-add-music'))}
+              className="p-2 text-spotify-green bg-spotify-green/10 rounded-full hover:bg-spotify-green/20 transition-colors md:hidden"
+              title="Adicionar Música"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            </button>
+            <button className="flex items-center gap-2 p-1 pr-3 md:pr-4 rounded-full bg-black/80 hover:bg-black/60 transition-all group">
               {user.user_metadata.avatar_url ? (
                 <img src={user.user_metadata.avatar_url} alt="User" className="w-7 h-7 rounded-full" />
               ) : (

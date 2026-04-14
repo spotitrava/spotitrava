@@ -46,7 +46,7 @@ const Sidebar = () => {
           Músicas Curtidas
         </button>
 
-        {user?.email === 'spotitrava@gmail.com' && (
+        {user && (
           <button 
             onClick={() => window.dispatchEvent(new CustomEvent('open-add-music'))}
             className="w-full flex items-center gap-4 px-4 py-3 text-sm font-medium text-spotify-green hover:bg-white/10 rounded-lg transition-colors group mt-4 border border-spotify-green/20"
