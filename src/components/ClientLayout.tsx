@@ -119,10 +119,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></svg>
               <span className="text-[10px] mt-1 font-medium text-center">Sua Biblioteca</span>
             </Link>
-            <Link href="#" className="flex flex-col items-center justify-center p-2 text-white/50 hover:text-white transition-colors cursor-not-allowed">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              <span className="text-[10px] mt-1 font-medium">Premium</span>
-            </Link>
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-add-music'))}
+              className="flex flex-col items-center justify-center p-2 text-white/50 hover:text-white transition-colors"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              <span className="text-[10px] mt-1 font-medium text-center">Adicionar</span>
+            </button>
           </div>
         </div>
       </PlayerProvider>
